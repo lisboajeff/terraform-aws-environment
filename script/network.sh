@@ -56,6 +56,7 @@ for domain_name in $(yq -e '.domains[].name' $domain_file); do
             # Verificar o código de saída do script Python
             if [ $exit_code -eq 0 ]; then
                 echo "Sucesso: As listas de Name Servers são iguais."
+                echo "Execute o próximo módulo"
             else
                 echo "Erro: As listas de Name Servers não são iguais."
                 exit 1

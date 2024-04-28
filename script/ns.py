@@ -16,7 +16,7 @@ def main():
     import sys
 
     if len(sys.argv) != 3:
-        print("Uso: python script.py name_servers_dig name_servers_route53")
+        print("Uso: python script.py name_servers_route53 name_servers_dig")
         sys.exit(1)
 
     name_servers_dig = [ns[:-1] if ns.endswith('.') else ns for ns in  set(sys.argv[2].split(","))]

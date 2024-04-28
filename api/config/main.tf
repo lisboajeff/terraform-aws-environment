@@ -5,11 +5,10 @@ variable "domains" {
     sub_domains = list(object({
       name = string
       mtls = optional(object({
-        enabled            = optional(bool)
-        truststore         = optional(string)
-        bucket             = optional(string)
-        truststore_name    = optional(string)
-        truststore_version = optional(string)
+        truststore         = string
+        bucket             = string
+        truststore_name    = string
+        truststore_version = string
       }))
     }))
   }))
