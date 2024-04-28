@@ -1,3 +1,7 @@
+variable "AWS_REGION" {
+  type = string
+}
+
 provider "aws" {
-  region = "sa-east-1"
+  region = var.AWS_REGION
 }

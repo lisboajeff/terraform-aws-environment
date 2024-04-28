@@ -23,13 +23,13 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.TF_VAR_AWS_REGION }}
 
       - name: Terraform network
         run: |
           terraform -chdir=network init
           # terraform -chdir=network plan -out=network-tfplan
-          # terraform -chdir=network apply -auto-approve network-tfplan
+          #terraform -chdir=network apply -auto-approve network-tfplan
 
       - name: Terraform certificates
         run: |
