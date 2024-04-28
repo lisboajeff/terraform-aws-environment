@@ -15,7 +15,6 @@ variable "type" {
 
 variable "mtls" {
   type = object({
-    enabled            = bool
     bucket             = string
     truststore_name    = string
     truststore_version = string
