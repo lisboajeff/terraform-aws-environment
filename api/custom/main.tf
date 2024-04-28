@@ -3,6 +3,10 @@ variable "domain_name" {
   description = "Domain name"
 }
 
+variable "sub_domain_name" {
+  type = string
+}
+
 variable "type" {
   type    = string
   default = "REGIONAL"
@@ -31,7 +35,7 @@ module "aws_api_gateway_domain_name_mtls" {
   count                    = var.mtls.enabled ? 1 : 0
   source                   = "./mtls"
   mtls                     = var.mtls
-  domain_name              = var.domain_name
+  domain_name              = var.sub_domain_name
   regional_certificate_arn = data.aws_acm_certificate.acm.arn
   type                     = var.type
   route53_zone_id          = data.aws_route53_zone.primary.zone_id
@@ -40,7 +44,7 @@ module "aws_api_gateway_domain_name_mtls" {
 module "aws_api_gateway_domain_name_comum" {
   count                    = var.mtls.enabled ? 0 : 1
   source                   = "./comum"
-  domain_name              = var.domain_name
+  domain_name              = var.sub_domain_name
   regional_certificate_arn = data.aws_acm_certificate.acm.arn
   type                     = var.type
   route53_zone_id          = data.aws_route53_zone.primary.zone_id

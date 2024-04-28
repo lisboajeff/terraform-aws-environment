@@ -78,118 +78,31 @@ Antes de iniciar a configuração do projeto, certifique-se de que os seguintes 
 
 ## Provisonamentos
 
-### Provisionamento : Network
+### Inicializando
 
 ```sh
 #!/bin/bash
-
-# Define os diretórios dos módulos
-network_dir="network"
-
-# Aplicando configurações no módulo de Network
-echo "Aplicando configurações na rede..."
-terraform -chdir="$network_dir" apply -auto-approve -var="domain_yaml_path=domain.yaml"
-echo "Configurações da rede aplicadas."
-"
+chmod +x init.sh
+./init.sh
 ```
 
-### Recuperando Servidores DNS
+### Network
 
 ```sh
 #!/bin/bash
-
-# Caminho para o arquivo domain.yaml
-domain_file="$1"
-
-# Ler cada domínio do arquivo domain.yaml
-for domain_name in $(yq e '.domains[].name' $domain_file)
-do
-    echo "Processando o domínio: $domain_name"
-
-    # Adicionar um ponto no final do domínio se necessário
-    domain_name="$domain_name."
-
-    # Recuperar o ID da zona usando AWS CLI
-    zone_id=$(aws route53 list-hosted-zones | jq -r --arg domain_name "$domain_name" '.HostedZones[] | select(.Name==$domain_name) | .Id')
-
-    # Verificar se o ID da zona foi encontrado
-    if [ -z "$zone_id" ]; then
-        echo "Nenhuma zona encontrada para o domínio $domain_name"
-    else
-        echo "ID da zona para o domínio $domain_name: $zone_id"
-
-        # Recuperar os servidores DNS para o ID da zona encontrado
-        name_servers=$(aws route53 get-hosted-zone --id $zone_id | jq -r '.DelegationSet.NameServers[]')
-        echo "Servidores DNS para o domínio $domain_name:"
-        for ns in $name_servers; do
-            echo $ns
-        done
-    fi
-    echo "-----------------------------------"
-done
-
+./script/network.sh /tmp/domain.yaml
 ```
 
-### Provisionamento : Certificates
+### Certificate
 
 ```sh
 #!/bin/bash
-
-# Define os diretórios dos módulos
-domain_dir="domain"
-
-# Aplicando configurações no módulo de Domain
-echo "Aplicando configurações no domínio..."
-terraform -chdir="$domain_dir" apply -auto-approve -var="domain_yaml_path=domain.yaml"
-echo "Configurações de domínio aplicadas."
-
+./script/certificates.sh /tmp/domain.yaml
 ```
 
-### Provisionamento : API
+### API
 
 ```sh
 #!/bin/bash
-
-# Caminho para o arquivo domain.yaml
-domain_file="$1"
-
-# Ler cada domínio do arquivo domain.yaml usando yq
-for domain_name in $(yq e '.domains[].name' $domain_file)
-do
-    echo "Processando o domínio: $domain_name"
-
-    # Usar AWS CLI para listar todos os certificados e filtrar pelo nome do domínio
-    certificate_arn=$(aws acm list-certificates | jq -r --arg domain_name "$domain_name" '.CertificateSummaryList[] | select(.DomainName==$domain_name) | .CertificateArn')
-
-    # Verificar se o ARN foi encontrado
-    if [ -z "$certificate_arn" ]; then
-        echo "Nenhum certificado encontrado para o domínio $domain_name."
-    else
-        echo "O ARN do certificado para o domínio $domain_name é: $certificate_arn"
-
-        # Usar AWS CLI para obter informações sobre o certificado
-        cert_status=$(aws acm describe-certificate --certificate-arn $certificate_arn | jq -r '.Certificate.Status')
-
-        # Verificar o status do certificado
-        if [ "$cert_status" == "ISSUED" ]; then
-            echo "O certificado com ARN $certificate_arn está aprovado."
-
-            # Define os diretórios dos módulos
-            domain_dir="api"
-
-            # Aplicando configurações no módulo de Domain
-            echo "Aplicando configurações no domínio..."
-            terraform -chdir="$domain_dir" apply -auto-approve -var="domain_yaml_path=domain.yaml"
-            echo "Configurações de domínio aplicadas."
-
-        else
-            echo "O certificado com ARN $certificate_arn não está aprovado. Status atual: $cert_status"
-        fi
-
-    fi
-
-    echo "-----------------------------------"
-
-done
-
+./script/api.sh /tmp/domain.yaml
 ```
