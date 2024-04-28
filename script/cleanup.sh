@@ -21,6 +21,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Caminho base para o módulo
         module_path="$module" # Substitua pelo caminho correto
 
+        echo "Destruindo: $module"
+
+        terraform -chdir=$module destroy -auto-approve
+
         # Ler cada entrada no .gitignore e remover os arquivos/diretórios correspondentes
         while IFS= read -r line; do
             # Ignorar linhas vazias e comentários no .gitignore
