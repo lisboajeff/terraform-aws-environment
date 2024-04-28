@@ -3,18 +3,9 @@ variable "domain_name" {
   description = "Domain name"
 }
 
-variable "regional_certificate_arn" {
-  type        = string
-  description = "CERTIFICATE ARN"
-}
-
 variable "type" {
   type    = string
   default = "REGIONAL"
-}
-
-variable "route53_zone_id" {
-  type = string
 }
 
 variable "mtls" {
@@ -26,21 +17,31 @@ variable "mtls" {
   })
 }
 
+data "aws_acm_certificate" "acm" {
+  domain      = var.domain_name
+  statuses    = ["ISSUED"] # Lista de status desejados
+  most_recent = true       # Se existirem múltiplos certificados, pega o mais recente
+}
+
+data "aws_route53_zone" "primary" {
+  name = var.domain_name
+}
+
 module "aws_api_gateway_domain_name_mtls" {
   count                    = var.mtls.enabled ? 1 : 0
   source                   = "./mtls"
   mtls                     = var.mtls
   domain_name              = var.domain_name
-  regional_certificate_arn = var.regional_certificate_arn
+  regional_certificate_arn = data.aws_acm_certificate.acm.arn
   type                     = var.type
-  route53_zone_id          = var.route53_zone_id
+  route53_zone_id          = data.aws_route53_zone.primary.zone_id
 }
 
 module "aws_api_gateway_domain_name_comum" {
   count                    = var.mtls.enabled ? 0 : 1
   source                   = "./comum"
   domain_name              = var.domain_name
-  regional_certificate_arn = var.regional_certificate_arn
+  regional_certificate_arn = data.aws_acm_certificate.acm.arn
   type                     = var.type
-  route53_zone_id          = var.route53_zone_id
+  route53_zone_id          = data.aws_route53_zone.primary.zone_id
 }
