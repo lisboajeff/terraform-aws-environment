@@ -1,0 +1,11 @@
+domains:
+  - name: knin.cloud
+    wildcard:
+      - "*.knin.cloud"
+    sub_domains:
+      - name: venda.knin.cloud
+      - name: compra.knin.cloud
+        mtls:
+          truststore_name: Brasil/dev/certificates/truststore/posto.pem
+          truststore_version: zEzirXkVfaeCfDrRJftK07h0x9mi2tUs
+          bucket: bucket-certificates-test
